@@ -1,4 +1,5 @@
 
+#include <xxx/xxx.hxx>
 #include <xxx/xexceptions.hxx>
 
 #include <iostream>
@@ -6,6 +7,8 @@
 int
 main()
 {
+	std::cout << (xxx_version == xxx::get_version()) << std::endl;
+
 	using namespace	xxx::exception_iostream;
 		
 	std::exception	e;

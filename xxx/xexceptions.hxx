@@ -1,9 +1,9 @@
 ///	@file
-///	@brief		xxx exceptions.
+///	@brief		xxx common library.
 ///	@details	Utilities for exceptions.
 ///	@pre		ISO/IEC 14882:2017
 ///	@author		Mura
-///	@copyright	(C) 2018, Mura. All rights reserved. (MIT License)
+///	@copyright	(C) 2018-, Mura. All rights reserved. (MIT License)
 
 #ifndef xxx_XEXCEPTIONS_HXX_
 #define xxx_XEXCEPTIONS_HXX_
@@ -34,8 +34,7 @@ ignore_exceptions(P const& procedure) noexcept
 	{}
 }
 
-///	@brief	Ignores any exception.
-///	@copydoc	ignore_exceptions(P const&)
+///	@copydoc	ignore_exceptions()
 ///	@tparam		H	function object of exception handler
 ///	@param[in]		handler		Exception handler,
 ///								which requires only one std::exception_ptr parameter.
@@ -94,7 +93,7 @@ dump_exception_(std::ostream& os, std::exception const& e, unsigned nested) noex
 		auto const	p		= dynamic_cast<std::nested_exception const*>(&e);
 		auto const	name	= p == nullptr ? typeid(e).name() : "std::nested_exception";
 
-		if(0 == nested)
+		if(0u == nested)
 		{
 			os		<< e.what() << " (" << name << ")" << std::endl;
 		}
@@ -107,7 +106,7 @@ dump_exception_(std::ostream& os, std::exception const& e, unsigned nested) noex
 	}
 	catch(std::exception const& ee)
 	{
-		dump_exception_(os, ee, nested + 1);
+		dump_exception_(os, ee, nested + 1u);
 	}
 }
 
@@ -119,7 +118,7 @@ dump_exception_(std::ostream& os, std::exception const& e, unsigned nested) noex
 inline void
 dump_exception(std::ostream& os, std::exception const& e) noexcept
 {
-	impl::dump_exception_(os, e, 0);
+	impl::dump_exception_(os, e, 0u);
 }
 
 ///	@name	dump exception to iostream.
