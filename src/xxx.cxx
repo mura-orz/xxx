@@ -1,6 +1,6 @@
 ///	@file
 ///	@brief		xxx common library.
-///	@details	Utilities for exceptions.
+///	@details	Utilities.
 ///	@pre		ISO/IEC 14882:2017
 ///	@author		Mura
 ///	@copyright	(C) 2018-, Mura. All rights reserved. (MIT License)
