@@ -10,9 +10,11 @@ main()
 	std::cout << (xxx_version == xxx::get_version()) << std::endl;
 
 	using namespace	xxx::exception_iostream;
-		
-	std::exception	e;
-	std::cout	<< e << std::endl;
+
+	{
+		std::exception	e;
+		std::cout	<< e << std::endl;
+	}
 
 	try
 	{
@@ -27,14 +29,14 @@ main()
 				throw_with_nested(e);
 			}
 		}
-		catch(std::exception const& e)
+		catch(std::exception const& ee)
 		{
-			throw_with_nested(e);
+			throw_with_nested(ee);
 		}
 	}
-	catch(std::exception const& ee)
+	catch(std::exception const& eee)
 	{
-		std::cout	<< ee << std::endl;
+		std::cout	<< eee << std::endl;
 	}
 	return 0;
 }
