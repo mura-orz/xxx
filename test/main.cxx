@@ -3,40 +3,69 @@
 #include <xxx/xexceptions.hxx>
 
 #include <iostream>
+#include <iomanip>
 
-int
-main()
+void
+test_version()
 {
-	std::cout << (xxx_version == xxx::get_version()) << std::endl;
+	std::cout	<< "---[" << __func__ << "]---" << std::endl;
 
+	std::cout	<< std::hex << xxx_version << std::endl << xxx::get_version() << std::endl;
+
+	std::cout	<< (xxx_version == xxx::get_version() ? "match" : "unmatch") << std::endl;
+}
+
+void
+test_exception_dump()
+{
+	std::cout	<< "---[" << __func__ << "]---" << std::endl;
+
+	// To use << operator; otherwise, xxx::dump_exception() is available instead.
 	using namespace	xxx::exception_iostream;
 
+	// Plain
 	{
 		std::exception	e;
 		std::cout	<< e << std::endl;
+		xxx::dump_exception(std::cout, e);
 	}
 
+	// Nested
 	try
 	{
 		try
 		{
 			try
 			{
-				std::string().at(1);
+				std::string().at(1);	// Raise an exception focefully.
 			}
 			catch(std::exception const& e)
 			{
-				throw_with_nested(e);
+				std::throw_with_nested(e);
 			}
 		}
-		catch(std::exception const& ee)
+		catch(std::exception const& e)
 		{
-			throw_with_nested(ee);
+			std::throw_with_nested(e);
 		}
 	}
-	catch(std::exception const& eee)
+	catch(std::exception const& e)
 	{
-		std::cout	<< eee << std::endl;
+		std::cout	<< e << std::endl;
+		xxx::dump_exception(std::cout, e);
 	}
-	return 0;
+}
+
+void
+test_exception_handling()
+{
+	std::cout	<< "---[" << __func__ << "]---" << std::endl;
+}
+
+int
+main()
+{
+	test_version();
+	test_exception_dump();
+	test_exception_handling();
 }

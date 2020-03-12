@@ -130,7 +130,7 @@ namespace exception_iostream {
 ///	@return		It returns the @p os output stream.
 ///	@pre	Using the exception_iostream namespace is required.
 ///			e.g., @code
-///				using namespace exception_iostream;
+///				using namespace xxx::exception_iostream;
 ///			@endcode
 inline std::ostream&
 operator <<(std::ostream& os, std::exception const& e) noexcept
