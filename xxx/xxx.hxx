@@ -22,6 +22,11 @@ namespace xxx {
 ///	@return		version of built version
 std::uint32_t	get_version() noexcept;
 
+inline std::uint32_t	get_major_version(std::uint32_t version) noexcept    { return static_cast<std::uint32_t>((version >> 24) & 0x000000FF);  }
+inline std::uint32_t	get_minor_version(std::uint32_t version) noexcept    { return static_cast<std::uint32_t>((version >> 16) & 0x000000FF);  }
+inline std::uint32_t	get_revision(std::uint32_t version) noexcept         { return static_cast<std::uint32_t>((version >>  8) & 0x000000FF);  }
+inline std::uint32_t	get_extra_version(std::uint32_t version) noexcept    { return static_cast<std::uint32_t>((version >>  0) & 0x000000FF);  }
+  
 }	// namespace xxx
 
 #endif	// xxx_HXX_

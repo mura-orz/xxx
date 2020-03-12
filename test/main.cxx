@@ -2,6 +2,7 @@
 #include <xxx/xxx.hxx>
 #include <xxx/xexceptions.hxx>
 
+#include <stdexcept>
 #include <iostream>
 #include <iomanip>
 
@@ -10,7 +11,24 @@ test_version()
 {
 	std::cout	<< "---[" << __func__ << "]---" << std::endl;
 
-	std::cout	<< std::hex << xxx_version << std::endl << xxx::get_version() << std::endl;
+	auto const	head_version	= xxx_version;
+	auto const	body_version	= xxx::get_version();
+	
+	std::cout	<< std::hex;
+	
+	std::cout	<< "head:" << head_version << std::endl
+				<< "body:" << body_version << std::endl;
+
+	std::cout	<< std::dec;
+	
+	std::cout	<< "head ver. " << xxx::get_major_version(head_version)
+				<< '.' << xxx::get_minor_version(head_version)
+				<< '.' << xxx::get_revision(head_version)
+				<< '.' << xxx::get_extra_version(head_version) << std::endl;
+	std::cout	<< "body ver. " << xxx::get_major_version(body_version)
+				<< '.' << xxx::get_minor_version(body_version)
+				<< '.' << xxx::get_revision(body_version)
+				<< '.' << xxx::get_extra_version(body_version) << std::endl;
 
 	std::cout	<< (xxx_version == xxx::get_version() ? "match" : "unmatch") << std::endl;
 }
@@ -26,8 +44,14 @@ test_exception_dump()
 	// Plain
 	{
 		std::exception	e;
-		std::cout	<< e << std::endl;
 		xxx::dump_exception(std::cout, e);
+		std::cout	<< e << std::endl;
+	}
+
+	{
+		std::runtime_error	e{"test"};
+		xxx::dump_exception(std::cout, e);
+		std::cout	<< e << std::endl;
 	}
 
 	// Nested
@@ -51,8 +75,8 @@ test_exception_dump()
 	}
 	catch(std::exception const& e)
 	{
-		std::cout	<< e << std::endl;
 		xxx::dump_exception(std::cout, e);
+		std::cout	<< e << std::endl;
 	}
 }
 
@@ -60,6 +84,35 @@ void
 test_exception_handling()
 {
 	std::cout	<< "---[" << __func__ << "]---" << std::endl;
+	
+	xxx::ignore_exceptions([]()
+	{
+		throw std::runtime_error(__func__);
+	});
+	
+	auto	e	= xxx::suppress_exceptions([]()
+	{
+		throw std::runtime_error("any exception");
+	});
+	if(e)
+	{
+		try
+		{
+			std::rethrow_exception(e);
+		}
+		catch(std::exception const& ee)
+		{
+			std::cout	<< ee.what() << std::endl;
+		}
+	}
+	e	= xxx::suppress_exceptions([]()
+	{
+		;	// nothing
+	});
+	if( ! e)
+	{
+		std::cout << "no exception occurred" << std::endl;
+	}
 }
 
 int
