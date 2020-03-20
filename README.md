@@ -31,6 +31,7 @@ This library requires 'hosted environment' basically.
 Main targets are the following platforms:
  - 32/64-bit POSIX or similar OS
  - 32/64-bit Win32-based OS
+
 But it is easy to port the library to another platform
 because the library is free from such dependency as far as possible.
 Platform-depended and/or implementation-defined code are sepaarted.
@@ -53,12 +54,12 @@ This library conforms to the following specification:
 
 ### To build
 
- $ cmake .
- $ male
- $ ./test/test
+	$ cmake .
+	$ male
+	$ ./test/test
 
 ### To generate document
 
- $ doxygen
- $ w3m doc/xxx.html
+	$ doxygen
+	$ w3m doc/xxx.html
 
