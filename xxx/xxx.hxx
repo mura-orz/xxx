@@ -12,7 +12,7 @@
 
 ///	@brief	version of xxx.
 ///		e.g., 0x01020304 means version 1.2.3.4.
-#define		xxx_version			0x00010000
+#define		xxx_version			(0x00010000)
 
 ///	@name	xxx
 ///	@brief	root of xxx common library.
