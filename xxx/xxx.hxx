@@ -18,8 +18,8 @@
 ///	@brief	root of xxx common library.
 namespace xxx {
 
-///	@brief	Gets built version of xxx
-///	@return		version of built version
+///	@brief	Gets built version of xxx.
+///	@return		Built version of xxx.
 std::uint32_t	get_version() noexcept;
 
 ///	@brief	Gets major version of the @p version.
