@@ -18,7 +18,27 @@ namespace xxx {
 
 ///	@name	exception handling
 ///	@{
-	
+
+///	@brief	Suppresses any exception.
+///	@tparam		P	function object of procedure
+///	@param[in]		procedure	Procedure
+///	@return		If an exception occurred, it returns it as std::exception_ptr;
+///				otherwise, it returns nullptr as std::exception_ptr.
+template<typename P>
+inline std::exception_ptr
+suppress_exceptions(P const& procedure) noexcept
+{
+	try
+	{
+		procedure();
+		return nullptr;
+	}
+	catch(...)
+	{
+		return std::current_exception();
+	}
+}
+
 ///	@brief	Ignores any exception.
 ///	@tparam		P	function object of procedure
 ///	@param[in]		procedure	Procedure
@@ -42,38 +62,13 @@ template<typename P, typename H>
 inline void
 ignore_exceptions(P const& procedure, H const& handler) noexcept
 {
-	try
+	auto const	e	= suppress_exceptions(procedure);
+	if(e)
 	{
-		procedure();
-	}
-	catch(...)
-	{
-		try
+		ignore_exceptions([&handler, &e]()
 		{
-			handler(std::current_exception());
-		}
-		catch(...)
-		{}
-	}
-}
-
-///	@brief	Suppresses any exception.
-///	@tparam		P	function object of procedure
-///	@param[in]		procedure	Procedure
-///	@return		If an exception occurred, it returns it as std::exception_ptr;
-///				otherwise, it returns nullptr as std::exception_ptr.
-template<typename P>
-inline std::exception_ptr
-suppress_exceptions(P const& procedure) noexcept
-{
-	try
-	{
-		procedure();
-		return nullptr;
-	}
-	catch(...)
-	{
-		return std::current_exception();
+			handler(e);
+		});
 	}
 }
 
