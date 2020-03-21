@@ -5,8 +5,8 @@
 ///	@author		Mura
 ///	@copyright	(C) 2018-, Mura. All rights reserved. (MIT License)
 
-#ifndef xxx_XEXCEPTIONS_HXX_
-#define xxx_XEXCEPTIONS_HXX_
+#ifndef xxx_EXCEPTIONS_HXX_
+#define xxx_EXCEPTIONS_HXX_
 
 #include <exception>
 
@@ -154,4 +154,4 @@ operator <<(std::ostream& os, std::exception const& e) noexcept
 
 }	// namespace xxx
 
-#endif	// xxx_XEXCEPTIONS_HXX_
+#endif	// xxx_EXCEPTIONS_HXX_

@@ -1,6 +1,6 @@
 
 #include <xxx/xxx.hxx>
-#include <xxx/xexceptions.hxx>
+#include <xxx/exceptions.hxx>
 
 #include <stdexcept>
 #include <iostream>
