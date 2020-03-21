@@ -57,18 +57,32 @@ ignore_exceptions(P const& procedure) noexcept
 ///	@copydoc	ignore_exceptions()
 ///	@tparam		H	function object of exception handler
 ///	@param[in]		handler		Exception handler,
-///								which requires only one std::exception_ptr parameter.
+///								which requires only one const reference of std::exception parameter.
 template<typename P, typename H>
 inline void
 ignore_exceptions(P const& procedure, H const& handler) noexcept
 {
-	auto const	e	= suppress_exceptions(procedure);
-	if(e)
+	auto const	ep	= suppress_exceptions(procedure);
+	if(ep)
 	{
-		ignore_exceptions([&handler, &e]()
+		try
 		{
-			handler(e);
-		});
+			std::rethrow_exception(ep);
+		}
+		catch(std::exception const& e)
+		{
+			ignore_exceptions([&handler, &e]()
+			{
+				handler(e);
+			});
+		}
+		catch(...)
+		{
+			ignore_exceptions([&handler]()
+			{
+				handler(std::exception());
+			});
+		}
 	}
 }
 

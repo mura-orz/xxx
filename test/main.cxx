@@ -90,6 +90,18 @@ test_exception_handling()
 		throw std::runtime_error(__func__);
 	});
 	
+	xxx::ignore_exceptions([]()
+	{
+		throw std::runtime_error(__func__);
+	},
+	[](std::exception const& e)
+	{
+		xxx::ignore_exceptions([]()
+		{
+			std::cout << "an exception occurred" << std::endl;
+		});
+	});
+
 	auto	e	= xxx::suppress_exceptions([]()
 	{
 		throw std::runtime_error("any exception");
