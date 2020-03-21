@@ -1,5 +1,3 @@
-@mainpage
-
 # xxx common library
 
 (C) 2018-, Mura. All rights reserved.
@@ -9,7 +7,7 @@ This is my utility library written in C++17.
 ## Reserved names
 
 This library reserves the following names:
- - any names in the ::xxx namespase.
+ - any names in the global xxx namespase
  - all the macro names with 'xxx_' prefix
 
 ## Requirements
