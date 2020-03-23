@@ -1,4 +1,4 @@
-﻿# xxx
+# xxx
 # (C) 2018-, Mura, All rights reserved.
 
 cmake_minimum_required (VERSION 3.8)
@@ -13,7 +13,7 @@ target_sources				(xxx	PRIVATE
 )
 target_sources				(xxx	PUBLIC
 	xxx/xxx.hxx
-	xxx/xexceptions.hxx
+	xxx/exceptions.hxx
 )
 target_compile_features		(xxx	PUBLIC		cxx_std_17)
 target_compile_options		(xxx	PUBLIC		)
