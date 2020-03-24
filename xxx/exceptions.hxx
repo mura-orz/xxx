@@ -28,14 +28,22 @@ template<typename P>
 inline std::exception_ptr
 suppress_exceptions(P const& procedure) noexcept
 {
-	try
+	if constexpr (noexcept(procedure()))
 	{
 		procedure();
 		return nullptr;
 	}
-	catch(...)
+	else
 	{
-		return std::current_exception();
+		try
+		{
+			procedure();
+			return nullptr;
+		}
+		catch(...)
+		{
+			return std::current_exception();
+		}
 	}
 }
 
@@ -46,12 +54,19 @@ template<typename P>
 inline void
 ignore_exceptions(P const& procedure) noexcept
 {
-	try
+	if constexpr (noexcept(procedure()))
 	{
 		procedure();
 	}
-	catch(...)
-	{}
+	else
+	{
+		try
+		{
+			procedure();
+		}
+		catch(...)
+		{}
+	}
 }
 
 ///	@copydoc	ignore_exceptions()
@@ -62,26 +77,33 @@ template<typename P, typename H>
 inline void
 ignore_exceptions(P const& procedure, H const& handler) noexcept
 {
-	auto const	ep	= suppress_exceptions(procedure);
-	if(ep)
+	if constexpr (noexcept(procedure()))
 	{
-		try
+		procedure();
+	}
+	else
+	{
+		auto const	ep	= suppress_exceptions(procedure);
+		if(ep)
 		{
-			std::rethrow_exception(ep);
-		}
-		catch(std::exception const& e)
-		{
-			ignore_exceptions([&handler, &e]()
+			try
 			{
-				handler(e);
-			});
-		}
-		catch(...)
-		{
-			ignore_exceptions([&handler]()
+				std::rethrow_exception(ep);
+			}
+			catch(std::exception const& e)
 			{
-				handler(std::exception());
-			});
+				ignore_exceptions([&handler, &e]()
+				{
+					handler(e);
+				});
+			}
+			catch(...)
+			{
+				ignore_exceptions([&handler]()
+				{
+					handler(std::exception());
+				});
+			}
 		}
 	}
 }
