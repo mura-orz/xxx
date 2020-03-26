@@ -1,6 +1,7 @@
 
 #include <xxx/xxx.hxx>
 #include <xxx/exceptions.hxx>
+#include <xxx/finally.hxx>
 
 #include <stdexcept>
 #include <iostream>
@@ -127,10 +128,34 @@ test_exception_handling()
 	}
 }
 
+void
+test_finally()
+{
+	std::cout	<< "---[" << __func__ << "]---" << std::endl;
+
+	{
+		xxx::finally_t	finally([](){ std::cout << "finally" << std::endl; });
+
+		std::cout << "do something" << std::endl;
+	}
+
+	try
+	{
+		xxx::finally_t	finally([](){ std::cout << "finally" << std::endl; });
+
+		throw std::runtime_error("an exception occurred");
+	}
+	catch(std::exception const& e)
+	{
+		std::cout << e.what() << std::endl;
+	}
+}
+
 int
 main()
 {
 	test_version();
 	test_exception_dump();
 	test_exception_handling();
+	test_finally();
 }

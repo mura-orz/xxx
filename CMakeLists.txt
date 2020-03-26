@@ -14,6 +14,7 @@ target_sources				(xxx	PRIVATE
 target_sources				(xxx	PUBLIC
 	xxx/xxx.hxx
 	xxx/exceptions.hxx
+	xxx/finally.hxx
 )
 target_compile_features		(xxx	PUBLIC		cxx_std_17)
 target_compile_options		(xxx	PUBLIC		)
