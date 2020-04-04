@@ -1,7 +1,7 @@
 # xxx
 # (C) 2018-, Mura, All rights reserved.
 
-cmake_minimum_required (VERSION 3.8)
+cmake_minimum_required (VERSION 3.13)
 
 project ("xxx")
 
