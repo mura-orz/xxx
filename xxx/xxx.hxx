@@ -14,6 +14,17 @@
 ///		e.g., 0x01020304 means version 1.2.3.4.
 #define		xxx_version			(static_cast<std::uint32_t>(0x00010000))
 
+#if defined(WIN32) || defined(_WIN32)
+#if !defined(xxx_win32)
+#define xxx_win32
+#endif
+#endif
+#if !(defined(xxx_win32) || defined(xxx_posix))
+#error  "No platform is specified (xxx_win32/xxx_posix)"
+#elif defined(xxx_win32) && defined(xxx_posix)
+#error  "Multiple platforms are specified (xxx_win32/xxx_posix)"
+#endif
+
 ///	@name	xxx
 ///	@brief	root of xxx common library.
 namespace xxx {

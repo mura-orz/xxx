@@ -152,6 +152,15 @@ dump_exception(std::ostream& os, std::exception const& e) noexcept
 	impl::dump_exception_(os, e, 0u);
 }
 
+inline void
+validate_argument(bool valid, char const* message=nullptr)
+{
+	if( ! valid)
+	{
+		throw std::invalid_argument(message == nullptr ? "" : message);
+	}
+}
+
 ///	@name	dump exception to iostream.
 namespace exception_iostream {
 

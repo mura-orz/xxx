@@ -1,6 +1,7 @@
 
 #include <xxx/xxx.hxx>
 #include <xxx/exceptions.hxx>
+#include <xxx/logger.hxx>
 
 #include <stdexcept>
 #include <iostream>
@@ -61,7 +62,7 @@ test_exception_dump()
 		{
 			try
 			{
-				std::string().at(1);	// Raise an exception focefully.
+				(void)std::string().at(1);	// Raise an exception focefully.
 			}
 			catch(std::exception const& e)
 			{
@@ -96,9 +97,9 @@ test_exception_handling()
 	},
 	[](std::exception const& e)
 	{
-		xxx::ignore_exceptions([]()
+		xxx::ignore_exceptions([&e]()
 		{
-			std::cout << "an exception occurred" << std::endl;
+			std::cout << "an exception occurred:" << e.what() << std::endl;
 		});
 	});
 
@@ -127,10 +128,77 @@ test_exception_handling()
 	}
 }
 
+void
+test_logger()
+{
+	std::cout << "---[" << __func__ << "]---" << std::endl;
+
+	auto& logger = xxx::log::logger("");
+
+	logger.oops(xxx_log, "oops");
+	logger.err(xxx_log, "err");
+	logger.warn(xxx_log, "warn");
+	logger.notice(xxx_log, "notice");
+	logger.info(xxx_log, "info");
+	logger.trace(xxx_log, "trace");
+	logger.debug(xxx_log, "debug");
+	logger.verbose(xxx_log, "verbose");
+	logger.log(xxx::log::level_t::Fatal, xxx_log, "oops");
+	logger.log(xxx::log::level_t::Error, xxx_log, "err");
+	logger.log(xxx::log::level_t::Warn, xxx_log, "warn");
+	logger.log(xxx::log::level_t::Notice, xxx_log, "notice");
+	logger.log(xxx::log::level_t::Info, xxx_log, "info");
+	logger.log(xxx::log::level_t::Trace, xxx_log, "trace");
+	logger.log(xxx::log::level_t::Debug, xxx_log, "debug");
+	logger.log(xxx::log::level_t::Verbose, xxx_log, "verbose");
+
+	{
+		xxx::log::tracer_t	l(logger, xxx_log);
+	}
+	{
+		xxx::log::tracer_t	l(logger, xxx_log, "arg");
+	}
+	{
+		xxx::log::tracer_t	l(logger, xxx_log, "arg1", 2);
+	}
+	{
+		xxx::log::tracer_t	f(logger, xxx::log::level_t::Fatal, xxx_log, "oops");
+		xxx::log::tracer_t	e(logger, xxx::log::level_t::Error, xxx_log, "err");
+		xxx::log::tracer_t	w(logger, xxx::log::level_t::Warn, xxx_log, "warn");
+		xxx::log::tracer_t	n(logger, xxx::log::level_t::Notice, xxx_log, "notice");
+		xxx::log::tracer_t	i(logger, xxx::log::level_t::Info, xxx_log, "info");
+		xxx::log::tracer_t	t(logger, xxx::log::level_t::Trace, xxx_log, "trace");
+		xxx::log::tracer_t	d(logger, xxx::log::level_t::Debug, xxx_log, "debug");
+		xxx::log::tracer_t	v(logger, xxx::log::level_t::Verbose, xxx_log, "verbose");
+
+		using namespace std::string_literals;
+		f.set_result("1");
+		e.set_result("2"s);
+		w.set_result(3);
+	}
+
+	xxx::log::add_logger("tag", xxx::log::level_t::All, "test.log", "test", true);
+	auto&	logger2	= xxx::log::logger("tag");
+	logger2.oops(xxx_log, "oops");
+	logger2.err(xxx_log, "err");
+	logger2.warn(xxx_log, "warn");
+	logger2.notice(xxx_log, "notice");
+	logger2.info(xxx_log, "info");
+	logger2.trace(xxx_log, "trace");
+	logger2.debug(xxx_log, "debug");
+	logger2.verbose(xxx_log, "verbose");
+
+	{
+		xxx::log::tracer_t	l(logger2, xxx_log, "arg1", 2);
+		l.set_result(3);
+	}
+}
+
 int
 main()
 {
 	test_version();
 	test_exception_dump();
 	test_exception_handling();
+	test_logger();
 }
