@@ -1,7 +1,7 @@
 # xxx
 # (C) 2018-, Mura, All rights reserved.
 
-cmake_minimum_required (VERSION 3.8)
+cmake_minimum_required (VERSION 3.13)
 enable_language(CXX)
 
 find_package(Threads		REQUIRED)
@@ -55,6 +55,7 @@ target_sources				(xxx	PRIVATE
 target_sources				(xxx	PUBLIC
 	xxx/xxx.hxx
 	xxx/exceptions.hxx
+	xxx/finally.hxx
 	xxx/logger.hxx
 )
 target_compile_features		(xxx	PUBLIC		cxx_std_17)

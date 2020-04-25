@@ -77,33 +77,32 @@ template<typename P, typename H>
 inline void
 ignore_exceptions(P const& procedure, H const& handler) noexcept
 {
-	if constexpr (noexcept(procedure()))
+	//	This method is just for typical wrapper.
+	//	The suppress_exceptions and ignore_exceptions use constexpr inside.
+	
+	auto const	ep	= suppress_exceptions(procedure);
+	if(ep)
 	{
-		procedure();
-	}
-	else
-	{
-		auto const	ep	= suppress_exceptions(procedure);
-		if(ep)
+		try
 		{
-			try
+			std::rethrow_exception(ep);
+		}
+		catch(std::exception const& e)
+		{
+			ignore_exceptions([&handler, &e]()
 			{
-				std::rethrow_exception(ep);
-			}
-			catch(std::exception const& e)
+				handler(e);
+			});
+		}
+		catch(...)
+		{
+			ignore_exceptions([&handler]()
 			{
-				ignore_exceptions([&handler, &e]()
-				{
-					handler(e);
-				});
-			}
-			catch(...)
-			{
-				ignore_exceptions([&handler]()
-				{
-					handler(std::exception());
-				});
-			}
+				//	If actual exception's information is required,
+				//	use suppress_exceptions directly, instead.
+				//	This method is just for typical wrapper.
+				handler(std::exception());
+			});
 		}
 	}
 }
