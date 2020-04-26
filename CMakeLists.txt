@@ -20,7 +20,7 @@ set(GC		$<CXX_COMPILER_ID:GNU,Clang>)
 
 set(LANG
 	$<${VC}:/GR /GL /GS>
-	$<${GC}:-frtti -fexceptions -rdynamic>
+	$<${GC}:-frtti -fexceptions>
 )
 set(VALIDATOR
 	$<${VC}:/W4>
