@@ -11,13 +11,12 @@
 #include <filesystem>
 #include <stdexcept>
 #include <string>
-#include <mutex>
 
 #if defined(xxx_no_logging)
 #include <iosfwd>
 #else
 #include <sstream>
-
+#include <mutex>
 #endif	// xxx_no_logging
 
 namespace xxx {
@@ -146,6 +145,18 @@ public:
 		std::ostringstream	oss;
 		impl::dump_(oss, args...);
 		log_(level, file, line, function, oss.str().c_str());
+	}
+	///	@overload
+	void
+	log(level_t level, char const* file, long line, char const* function, char const* message)
+	{
+		log_(level, file, line, function, message);
+	}
+	///	@overload
+	void
+	log(level_t level, char const* file, long line, char const* function, std::string const& message)
+	{
+		log_(level, file, line, function, message.c_str());
 	}
 	///	@brief	Dumps log as fatal error.
 	///	@tparam			Args		arguments
