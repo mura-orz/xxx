@@ -13,10 +13,6 @@
 #include <string>
 #include <mutex>
 
-#ifndef xxx_no_logging
-#define xxx_no_logging
-#endif
-
 #if defined(xxx_no_logging)
 #include <iosfwd>
 #else
