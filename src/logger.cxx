@@ -33,6 +33,8 @@
 namespace xxx {
 namespace log {
 
+#if ! defined(xxx_no_logging)
+
 void
 logger_t::log_(level_t level, char const* file, long line, char const* function, char const* message)
 {
@@ -168,6 +170,8 @@ logger_t& logger(std::string const& tag)
 	validate_argument(itr != std::end(loggers_s));
 	return *itr->second;
 }
+
+#endif	// xxx_no_logging
 
 }	// namespace log
 }	// namespace xxx

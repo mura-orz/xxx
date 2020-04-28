@@ -11,8 +11,18 @@
 #include <filesystem>
 #include <stdexcept>
 #include <string>
-#include <sstream>
 #include <mutex>
+
+#ifndef xxx_no_logging
+#define xxx_no_logging
+#endif
+
+#if defined(xxx_no_logging)
+#include <iosfwd>
+#else
+#include <sstream>
+
+#endif	// xxx_no_logging
 
 namespace xxx {
 
@@ -37,6 +47,8 @@ enum class level_t
 ///	@brief	Logging utility macro.
 ///	It can be used as parameter of the following logging methods.
 #define xxx_log		__FILE__, __LINE__, __func__
+
+#if ! defined(xxx_no_logging)
 
 namespace impl {
 
@@ -67,14 +79,17 @@ enclose_(std::ostream& os, T const& head, Args... args)
 
 }	// namespace impl
 
+#endif	// xxx_no_logging
+
 ///	@brief	Encloses arguments.
 ///	@tparam			Args		Arguments.
 ///	@param[in]		args		Arguments.
 ///	@return		Arguments separated with comma and enclosed by parenthesis.
 template<typename... Args>
 inline std::string
-enclose(Args... args)
+enclose([[maybe_unused]] Args... args)
 {
+#if defined(xxx_no_logging)
 	std::ostringstream	oss;
 	oss << '(';
 	if constexpr (0 < sizeof...(args))
@@ -83,7 +98,39 @@ enclose(Args... args)
 	}
 	oss	<< ')';
 	return oss.str();
+#else	// xxx_no_logging
+	return std::string();
+#endif	// xxx_no_logging
 }
+
+#if defined(xxx_no_logging)
+
+class logger_t
+{
+public:
+	template<typename... Args>	void	log(level_t, char const*, long, char const*, Args...) {}
+	template<typename... Args>	void	oops(char const*, long, char const*, Args...) {}
+	template<typename... Args>	void	err(char const*, long, char const*, Args...) {}
+	template<typename... Args>	void	warn(char const*, long, char const*, Args...) {}
+	template<typename... Args>	void	notice(char const*, long, char const*, Args...) {}
+	template<typename... Args>	void	info(char const*, long, char const* function, Args...)  {}
+	template<typename... Args>	void	debug(char const*, long, char const* function, Args...) {}
+	template<typename... Args>	void	trace(char const*, long, char const*, Args...) {}
+	template<typename... Args>	void	verbose(char const*, long, char const*, Args...) {}
+public:
+	void	set_logger(std::string const&) {}
+	void	set_path(std::filesystem::path const&) {}
+	void	set_console(bool) {}
+
+	auto	logger()const noexcept	{ return std::filesystem::path();	}
+	auto	path()const noexcept	{ return std::string();	}
+	auto	console()const noexcept	{ return false;	}
+public:
+	logger_t(level_t, std::filesystem::path const&, std::string const, bool) {}
+	logger_t() {}
+};
+
+#else	// xxx_no_logging
 
 ///	@brief	Logger.
 class logger_t
@@ -97,7 +144,7 @@ public:
 	///	@param[in]		function	function name such as __func__
 	///	@param[in]		args		More arguments to log
 	template<typename... Args>
-	inline void
+	void
 	log(level_t level, char const* file, long line, char const* function, Args... args)
 	{
 		std::ostringstream	oss;
@@ -112,7 +159,7 @@ public:
 	///	@param[in]		args		More arguments to log
 	///	@see			xxx_log
 	template<typename... Args>
-	inline void
+	void
 	oops(char const* file, long line, char const* function, Args... args)
 	{
 		log(level_t::Fatal, file, line, function, args...);
@@ -125,7 +172,7 @@ public:
 	///	@param[in]		args		More arguments to log
 	///	@see			xxx_log
 	template<typename... Args>
-	inline void
+	void
 	err(char const* file, long line, char const* function, Args... args)
 	{
 		log(level_t::Error, file, line, function, args...);
@@ -138,7 +185,7 @@ public:
 	///	@param[in]		args		More arguments to log
 	///	@see			xxx_log
 	template<typename... Args>
-	inline void
+	void
 	warn(char const* file, long line, char const* function, Args... args)
 	{
 		log(level_t::Warn, file, line, function, args...);
@@ -151,7 +198,7 @@ public:
 	///	@param[in]		args		More arguments to log
 	///	@see			xxx_log
 	template<typename... Args>
-	inline void
+	void
 	notice(char const* file, long line, char const* function, Args... args)
 	{
 		log(level_t::Notice, file, line, function, args...);
@@ -164,7 +211,7 @@ public:
 	///	@param[in]		args		More arguments to log
 	///	@see			xxx_log
 	template<typename... Args>
-	inline void
+	void
 	info(char const* file, long line, char const* function, Args... args)
 	{
 		log(level_t::Info, file, line, function, args...);
@@ -177,7 +224,7 @@ public:
 	///	@param[in]		args		More arguments to log
 	///	@see			xxx_log
 	template<typename... Args>
-	inline void
+	void
 	debug(char const* file, long line, char const* function, Args... args)
 	{
 		log(level_t::Debug, file, line, function, args...);
@@ -190,7 +237,7 @@ public:
 	///	@param[in]		args		More arguments to log
 	///	@see			xxx_log
 	template<typename... Args>
-	inline void
+	void
 	trace(char const* file, long line, char const* function, Args... args)
 	{
 		log(level_t::Trace, file, line, function, args...);
@@ -203,7 +250,7 @@ public:
 	///	@param[in]		args		More arguments to log
 	///	@see			xxx_log
 	template<typename... Args>
-	inline void
+	void
 	verbose(char const* file, long line, char const* function, Args... args)
 	{
 		log(level_t::Verbose, file, line, function, args...);
@@ -254,6 +301,16 @@ private:
 	std::mutex				mutex_;		///< Mutex.
 };
 
+#endif	// xxx_no_logging
+
+#if defined(xxx_no_logging)
+
+inline void			add_logger(std::string const&, level_t, std::filesystem::path const&, std::string const&, bool) {}
+inline void			remove_logger(std::string const&) {}
+inline logger_t		logger(std::string const&) { return logger_t();	}
+
+#else	// xxx_no_logging
+
 ///	@brief	Adds a new logger.
 ///	@param[in]		tag			New tag of logger.
 ///	@param[in]		level		Filter level.
@@ -268,6 +325,23 @@ void		remove_logger(std::string const& tag);
 ///	@param[in]		tag			Tag of logger.
 ///	@return			Logger.
 logger_t&	logger(std::string const& tag);
+
+#endif	// xxx_no_logging
+
+#if defined(xxx_no_logging)
+
+class tracer_t
+{
+public:
+	template<typename... Args>	tracer_t(logger_t&, char const*, long, char const*, Args...) {}
+	template<typename... Args>	tracer_t(logger_t&, level_t, char const*, long, char const*, Args...) {}
+
+	template<typename T>	void	set_result(T) {}
+	template<>				void	set_result(char const*) {}
+	template<>				void	set_result(std::string const&) {}
+};
+
+#else	// xxx_no_logging
 
 ///	@brief	Log tracer.
 class tracer_t
@@ -327,6 +401,8 @@ private:
 	tracer_t(tracer_t const&)						= delete;
 	tracer_t const&		operator =(tracer_t const&)	= delete;
 };
+
+#endif	// xxx_no_logging
 
 }	// namespace log
 }	// namespace xxx
