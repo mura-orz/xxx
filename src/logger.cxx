@@ -35,6 +35,17 @@ namespace log {
 
 #if ! defined(xxx_no_logging)
 
+inline std::string
+strip(std::string const& str)
+{
+	auto const	pos		= str.find_last_of("\\/");
+	if(pos == std::string::npos)
+	{
+		return str;
+	}
+	return str.substr(pos);
+}
+
 void
 logger_t::log_(level_t level, char const* file, long line, char const* function, char const* message)
 {
@@ -48,9 +59,11 @@ logger_t::log_(level_t level, char const* file, long line, char const* function,
 
 	char const*	Lv[]	= { " [S] ", " [F] ", " [E] ", " [W] ", " [N] ", " [I] ", " [D] ", " [T] ", " [V] ", " [A] " };
 
+	std::string const	filename	= strip(file);
+
 	std::ostringstream	oss;
 
-	std::lock_guard		lock(mutex_);
+	std::lock_guard		lock{ mutex_ };
 
 	{
 		auto const		now	= std::chrono::system_clock::now();
@@ -58,7 +71,7 @@ logger_t::log_(level_t level, char const* file, long line, char const* function,
 		oss	<< std::put_time(std::gmtime(&t), "%FT%T%z")
 			<< Lv[static_cast<int>(level)]
 			<< (message == nullptr ? "" : message)
-			<< " - {{" << file << ':' << line << ' ' << function << "}}";
+			<< "  {{" << filename << ':' << line << ' ' << function << "}}";
 	}
 	auto const	str		= oss.str();
 
