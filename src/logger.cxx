@@ -38,49 +38,55 @@ namespace log {
 inline std::string
 strip(std::string const& str)
 {
-	auto const	pos		= str.find_last_of("\\/");
-	if(pos == std::string::npos)
+	auto const	pos{ str.find_last_of("\\/") };
+	if (pos == std::string::npos)
 	{
 		return str;
 	}
-	return str.substr(pos);
+	return str.substr(pos+1);
 }
 
 void
-logger_t::log_(level_t level, char const* file, long line, char const* function, char const* message)
+logger_t::log_(level_t level, std::optional<pos_t> const& pos, char const* message)
 {
+	using namespace std::string_literals;
+
 	validate_argument(level != level_t::Silent && level != level_t::All);
-	validate_argument(file != nullptr && function != nullptr);
+	if(pos)
+	{
+		validate_argument(pos->file() != nullptr && pos->function() != nullptr);
+	}
 
 	if(static_cast<int>(level_) < static_cast<int>(level))
 	{
 		return;
 	}
 
-	char const*	Lv[]	= { " [S] ", " [F] ", " [E] ", " [W] ", " [N] ", " [I] ", " [D] ", " [T] ", " [V] ", " [A] " };
+	char const*	Lv[]{ " [S] ", " [F] ", " [E] ", " [W] ", " [N] ", " [I] ", " [D] ", " [T] ", " [V] ", " [A] " };
 
-	std::string const	filename	= strip(file);
+	auto const			filename{ pos ? strip(pos->file()) : ""s };
 
 	std::ostringstream	oss;
 
 	std::lock_guard		lock{ mutex_ };
 
 	{
-		auto const		now	= std::chrono::system_clock::now();
-		auto const		t	= std::chrono::system_clock::to_time_t(now);
-		oss	<< std::put_time(std::gmtime(&t), "%FT%T%z")
-			<< Lv[static_cast<int>(level)]
-			<< (message == nullptr ? "" : message)
-			<< "  {{" << filename << ':' << line << ' ' << function << "}}";
+		auto const		now{ std::chrono::system_clock::now() };
+		auto const		t{ std::chrono::system_clock::to_time_t(now) };
+		oss << std::put_time(std::localtime(&t), "%FT%T%z")
+			<< Lv[static_cast<int>(level)];
+		if(pos)
+		{
+			oss << "{{" << filename << ':' << pos->line() << ' ' << pos->function() << "}} ";
+		}
+		oss << (message == nullptr ? "" : message);
 	}
-	auto const	str		= oss.str();
+	auto const	str{ oss.str() };
 
 	if(console_)
 	{
 		ignore_exceptions([&str, level]()
 		{
-			using namespace std::string_literals;
-				
 			std::string		begin;
 			switch(level)
 			{
@@ -95,7 +101,7 @@ logger_t::log_(level_t level, char const* file, long line, char const* function,
 			default:				begin	= "\x1b[0m"s;			break;
 			}
 
-			auto const	end		= "\x1b[0m"s;
+			auto const	end{ "\x1b[0m"s };
 
 			std::clog	<< begin << str << end << std::endl;
 		});
@@ -104,7 +110,7 @@ logger_t::log_(level_t level, char const* file, long line, char const* function,
 	{
 		ignore_exceptions([&str, this]()
 		{
-			std::ofstream	ofs(path_, std::ios::out | std::ios::app);
+			std::ofstream	ofs{ path_, std::ios::out | std::ios::app };
 			if(ofs.is_open())
 			{
 				ofs << str << std::endl;
@@ -149,9 +155,9 @@ add_logger(std::string const& tag, level_t level, std::filesystem::path const& p
 {
 	validate_argument( ! tag.empty());
 
-	std::lock_guard		lock(loggers_mutex_s);
+	std::lock_guard		lock{ loggers_mutex_s };
 
-	auto	itr	= loggers_s.find(tag);
+	auto	itr{ loggers_s.find(tag) };
 	validate_argument(itr == std::end(loggers_s));
 
 	loggers_s[tag]	= std::make_unique<logger_t>(level, path, logger, console);
@@ -162,9 +168,9 @@ remove_logger(std::string const& tag)
 {
 	validate_argument( ! tag.empty());
 
-	std::lock_guard		lock(loggers_mutex_s);
+	std::lock_guard		lock{ loggers_mutex_s };
 
-	auto	itr	= loggers_s.find(tag);
+	auto	itr{ loggers_s.find(tag) };
 	validate_argument(itr != std::end(loggers_s));
 	loggers_s.erase(itr);
 }
@@ -173,13 +179,13 @@ logger_t& logger(std::string const& tag)
 {
 	std::call_once(logger_once_s, []()
 		{
-			std::lock_guard		lock(loggers_mutex_s);
+			std::lock_guard		lock{ loggers_mutex_s };
 			loggers_s[""]	= std::make_unique<logger_t>();
 		});
 
-	std::lock_guard		lock(loggers_mutex_s);
+	std::lock_guard		lock{ loggers_mutex_s };
 
-	auto itr	= loggers_s.find(tag);
+	auto itr{ loggers_s.find(tag) };
 	validate_argument(itr != std::end(loggers_s));
 	return *itr->second;
 }
