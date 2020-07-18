@@ -34,7 +34,7 @@ But it is easy to port the library to another platform
 because the library is free from such dependency as far as possible.
 Platform-depended and/or implementation-defined code are sepaarted.
 
-## Dpendency
+## Dependency
 
 This library supports both the static (such as '.a' or '.lib') and
 dynamic (such as '.so' or '.dll') link.
