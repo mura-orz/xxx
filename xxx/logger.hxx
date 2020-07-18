@@ -57,7 +57,7 @@ private:
 
 ///	@brief	Logging utility macro.
 ///	It can be used as parameter of the following logging methods.
-#define xxx_log		::xxx::log::pos_t{__FILE__, __LINE__, __func__}
+#define xxx_logpos		::xxx::log::pos_t{__FILE__, __LINE__, __func__}
 
 #if ! defined(xxx_no_logging)
 
@@ -185,7 +185,7 @@ public:
 	///	@tparam			Args		arguments
 	///	@param[in]		pos			Position of source.
 	///	@param[in]		args		More arguments to log
-	///	@see			xxx_log
+	///	@see			xxx_logpos
 	template<typename... Args>
 	void
 	oops(pos_t const& pos, Args... args)
@@ -196,7 +196,7 @@ public:
 	///	@tparam			Args		arguments
 	///	@param[in]		pos			Position of source.
 	///	@param[in]		args		More arguments to log
-	///	@see			xxx_log
+	///	@see			xxx_logpos
 	template<typename... Args>
 	void
 	err(pos_t const& pos, Args... args)
@@ -207,7 +207,7 @@ public:
 	///	@tparam			Args		arguments
 	///	@param[in]		pos			Position of source.
 	///	@param[in]		args		More arguments to log
-	///	@see			xxx_log
+	///	@see			xxx_logpos
 	template<typename... Args>
 	void
 	warn(pos_t const& pos, Args... args)
@@ -218,7 +218,7 @@ public:
 	///	@tparam			Args		arguments
 	///	@param[in]		pos			Position of source.
 	///	@param[in]		args		More arguments to log
-	///	@see			xxx_log
+	///	@see			xxx_logpos
 	template<typename... Args>
 	void
 	notice(pos_t const& pos, Args... args)
@@ -229,7 +229,7 @@ public:
 	///	@tparam			Args		arguments
 	///	@param[in]		pos			Position of source.
 	///	@param[in]		args		More arguments to log
-	///	@see			xxx_log
+	///	@see			xxx_logpos
 	template<typename... Args>
 	void
 	info(pos_t const& pos, Args... args)
@@ -240,7 +240,7 @@ public:
 	///	@tparam			Args		arguments
 	///	@param[in]		pos			Position of source.
 	///	@param[in]		args		More arguments to log
-	///	@see			xxx_log
+	///	@see			xxx_logpos
 	template<typename... Args>
 	void
 	debug(pos_t const& pos, Args... args)
@@ -251,7 +251,7 @@ public:
 	///	@tparam			Args		arguments
 	///	@param[in]		pos			Position of source.
 	///	@param[in]		args		More arguments to log
-	///	@see			xxx_log
+	///	@see			xxx_logpos
 	template<typename... Args>
 	void
 	trace(pos_t const& pos, Args... args)
@@ -262,7 +262,7 @@ public:
 	///	@tparam			Args		arguments
 	///	@param[in]		pos			Position of source.
 	///	@param[in]		args		More arguments to log
-	///	@see			xxx_log
+	///	@see			xxx_logpos
 	template<typename... Args>
 	void
 	verbose(pos_t const& pos, Args... args)
@@ -297,7 +297,7 @@ public:
 	///	@brief	Dumps log as fatal error.
 	///	@tparam			Args		arguments
 	///	@param[in]		args		More arguments to log
-	///	@see			xxx_log
+	///	@see			xxx_logpos
 	template<typename... Args>
 	void
 	oops(Args... args)
@@ -307,7 +307,7 @@ public:
 	///	@brief	Dumps log as normal error.
 	///	@tparam			Args		arguments
 	///	@param[in]		args		More arguments to log
-	///	@see			xxx_log
+	///	@see			xxx_logpos
 	template<typename... Args>
 	void
 	err(Args... args)
@@ -317,7 +317,7 @@ public:
 	///	@brief	Dumps log as warning.
 	///	@tparam			Args		arguments
 	///	@param[in]		args		More arguments to log
-	///	@see			xxx_log
+	///	@see			xxx_logpos
 	template<typename... Args>
 	void
 	warn(Args... args)
@@ -327,7 +327,7 @@ public:
 	///	@brief	Dumps log as notice.
 	///	@tparam			Args		arguments
 	///	@param[in]		args		More arguments to log
-	///	@see			xxx_log
+	///	@see			xxx_logpos
 	template<typename... Args>
 	void
 	notice(Args... args)
@@ -337,7 +337,7 @@ public:
 	///	@brief	Dumps log as information.
 	///	@tparam			Args		arguments
 	///	@param[in]		args		More arguments to log
-	///	@see			xxx_log
+	///	@see			xxx_logpos
 	template<typename... Args>
 	void
 	info(Args... args)
@@ -347,7 +347,7 @@ public:
 	///	@brief	Dumps log as debug info.
 	///	@tparam			Args		arguments
 	///	@param[in]		args		More arguments to log
-	///	@see			xxx_log
+	///	@see			xxx_logpos
 	template<typename... Args>
 	void
 	debug(Args... args)
@@ -357,7 +357,7 @@ public:
 	///	@brief	Dumps log as trace.
 	///	@tparam			Args		arguments
 	///	@param[in]		args		More arguments to log
-	///	@see			xxx_log
+	///	@see			xxx_logpos
 	template<typename... Args>
 	void
 	trace(Args... args)
@@ -367,7 +367,7 @@ public:
 	///	@brief	Dumps log as verbose.
 	///	@tparam			Args		arguments
 	///	@param[in]		args		More arguments to log
-	///	@see			xxx_log
+	///	@see			xxx_logpos
 	template<typename... Args>
 	void
 	verbose(Args... args)
@@ -379,13 +379,16 @@ public:
 	///		- [xxx_win32]	dump to debugger (in debug mode)
 	///		- [xxx_posix]	dump to syslog
 	///	@param[in]		logger		Logger name
-	void	set_logger(std::string const& logger)		{ logger_	= logger;	}
+	void	set_logger(std::string const& logger)		{ std::lock_guard{ mutex_ };	logger_ = logger; }
 	///	@brief	Sets log file.
 	///	@param[in]		path		The path of log name.
-	void	set_path(std::filesystem::path const& path)	{ path_		= path;		}
+	void	set_path(std::filesystem::path const& path)	{ std::lock_guard{ mutex_ };	path_		= path;		}
 	///	@brief	Sets whether dump it to standard error or not.
 	///	@param[in]		on		Whether dump it to standart error or not..
-	void	set_console(bool on)						{ console_	= on;		}
+	void	set_console(bool on)						{ std::lock_guard{ mutex_ };	console_	= on;		}
+	///	@brief	Sets loggihng level.
+	///	@param[in]		level		Logger level.
+	void	set_level(level_t level)					{ std::lock_guard{ mutex_ };	level_	= level;	}
 
 	///	@brief	Gets the external logger name.
 	///	@return		External logger name.
@@ -454,8 +457,6 @@ class tracer_t
 public:
 	template<typename... Args>	tracer_t(logger_t&, pos_t const& pos, Args...) {}
 	template<typename... Args>	tracer_t(logger_t&, level_t, pos_t const& pos, Args...) {}
-	template<typename... Args>	tracer_t(logger_t&, Args...) {}
-	template<typename... Args>	tracer_t(logger_t&, level_t, Args...) {}
 
 	template<typename T>	void	set_result(T) {}
 	template<>				void	set_result(char const*) {}
@@ -472,22 +473,17 @@ public:
 	///	@param[in]		logger		Logger to dump.
 	///	@param[in]		pos			Position of source.
 	///	@param[in]		args		More agruments.
-	///	@see			xxx_log
+	///	@see			xxx_logpos
 	template<typename... Args>
 	tracer_t(logger_t& logger, pos_t const& pos, Args... args) :
 		tracer_t(logger, level_t::Trace, pos, args...)
-	{}
-	///	@overload
-	template<typename... Args>
-	tracer_t(logger_t& logger, Args... args) :
-		tracer_t(logger, level_t::Trace, args...)
 	{}
 	///	@brief	Dumps log at entering into the scope.
 	///	@param[in]		logger		Logger to dump.
 	///	@param[in]		level		Logger level.
 	///	@param[in]		pos			Position of source.
 	///	@param[in]		args		More agruments.
-	///	@see			xxx_log
+	///	@see			xxx_logpos
 	template<typename... Args>
 	tracer_t(logger_t& logger, level_t level, pos_t const& pos, Args... args) :
 		logger_{ logger },
@@ -496,16 +492,6 @@ public:
 		level_{ level }
 	{
 		logger_.log(level, pos, ">>>[[ ", pos.function(), enclose(args...), " ]]");
-	}
-	///	@overload
-	template<typename... Args>
-	tracer_t(logger_t& logger, level_t level, Args... args) :
-		logger_{ logger },
-		pos_{},
-		result_{},
-		level_{ level }
-	{
-		logger_.log(level, ">>>[[ ", enclose(args...), " ]]");
 	}
 	///	@brief	Dumps log at leaving from the scope.
 	~tracer_t()
