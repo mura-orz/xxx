@@ -459,8 +459,6 @@ public:
 	template<typename... Args>	tracer_t(logger_t&, level_t, pos_t const& pos, Args...) {}
 
 	template<typename T>	void	set_result(T) {}
-	template<>				void	set_result(char const*) {}
-	template<>				void	set_result(std::string const&) {}
 };
 
 #else	// xxx_no_logging
