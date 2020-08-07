@@ -53,7 +53,7 @@ This library conforms to the following specification:
 ### To build
 
 	$ cmake .
-	$ male
+	$ make
 	$ ./test/test
 
 ### To generate document
