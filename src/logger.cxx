@@ -110,7 +110,7 @@ logger_t::log_(level_t level, std::optional<pos_t> const& pos, char const* messa
 	{
 		ignore_exceptions([&str, this]()
 		{
-			std::ofstream	ofs{ path_, std::ios::out | std::ios::app };
+			std::ofstream	ofs{ path_, std::ios::app };
 			if(ofs.is_open())
 			{
 				ofs << str << std::endl;
