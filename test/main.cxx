@@ -164,41 +164,41 @@ test_logger()
 
 	auto& logger = xxx::log::logger("");
 
-	logger.oops(xxx_log, "oops");
-	logger.err(xxx_log, "err");
-	logger.warn(xxx_log, "warn");
-	logger.notice(xxx_log, "notice");
-	logger.info(xxx_log, "info");
-	logger.trace(xxx_log, "trace");
-	logger.debug(xxx_log, "debug");
-	logger.verbose(xxx_log, "verbose");
-	logger.log(xxx::log::level_t::Fatal, xxx_log, "oops");
-	logger.log(xxx::log::level_t::Error, xxx_log, "err");
-	logger.log(xxx::log::level_t::Warn, xxx_log, "warn");
-	logger.log(xxx::log::level_t::Notice, xxx_log, "notice");
-	logger.log(xxx::log::level_t::Info, xxx_log, "info");
-	logger.log(xxx::log::level_t::Trace, xxx_log, "trace");
-	logger.log(xxx::log::level_t::Debug, xxx_log, "debug");
-	logger.log(xxx::log::level_t::Verbose, xxx_log, "verbose");
+	logger.oops(xxx_logpos, "oops");
+	logger.err(xxx_logpos, "err");
+	logger.warn(xxx_logpos, "warn");
+	logger.notice(xxx_logpos, "notice");
+	logger.info(xxx_logpos, "info");
+	logger.trace(xxx_logpos, "trace");
+	logger.debug(xxx_logpos, "debug");
+	logger.verbose(xxx_logpos, "verbose");
+	logger.log(xxx::log::level_t::Fatal, xxx_logpos, "oops");
+	logger.log(xxx::log::level_t::Error, xxx_logpos, "err");
+	logger.log(xxx::log::level_t::Warn, xxx_logpos, "warn");
+	logger.log(xxx::log::level_t::Notice, xxx_logpos, "notice");
+	logger.log(xxx::log::level_t::Info, xxx_logpos, "info");
+	logger.log(xxx::log::level_t::Trace, xxx_logpos, "trace");
+	logger.log(xxx::log::level_t::Debug, xxx_logpos, "debug");
+	logger.log(xxx::log::level_t::Verbose, xxx_logpos, "verbose");
 
 	{
-		xxx::log::tracer_t	l(logger, xxx_log);
+		xxx::log::tracer_t	l(logger, xxx_logpos);
 	}
 	{
-		xxx::log::tracer_t	l(logger, xxx_log, "arg");
+		xxx::log::tracer_t	l(logger, xxx_logpos, "arg");
 	}
 	{
-		xxx::log::tracer_t	l(logger, xxx_log, "arg1", 2);
+		xxx::log::tracer_t	l(logger, xxx_logpos, "arg1", 2);
 	}
 	{
-		xxx::log::tracer_t	f(logger, xxx::log::level_t::Fatal, xxx_log, "oops");
-		xxx::log::tracer_t	e(logger, xxx::log::level_t::Error, xxx_log, "err");
-		xxx::log::tracer_t	w(logger, xxx::log::level_t::Warn, xxx_log, "warn");
-		xxx::log::tracer_t	n(logger, xxx::log::level_t::Notice, xxx_log, "notice");
-		xxx::log::tracer_t	i(logger, xxx::log::level_t::Info, xxx_log, "info");
-		xxx::log::tracer_t	t(logger, xxx::log::level_t::Trace, xxx_log, "trace");
-		xxx::log::tracer_t	d(logger, xxx::log::level_t::Debug, xxx_log, "debug");
-		xxx::log::tracer_t	v(logger, xxx::log::level_t::Verbose, xxx_log, "verbose");
+		xxx::log::tracer_t	f(logger, xxx::log::level_t::Fatal, xxx_logpos, "oops");
+		xxx::log::tracer_t	e(logger, xxx::log::level_t::Error, xxx_logpos, "err");
+		xxx::log::tracer_t	w(logger, xxx::log::level_t::Warn, xxx_logpos, "warn");
+		xxx::log::tracer_t	n(logger, xxx::log::level_t::Notice, xxx_logpos, "notice");
+		xxx::log::tracer_t	i(logger, xxx::log::level_t::Info, xxx_logpos, "info");
+		xxx::log::tracer_t	t(logger, xxx::log::level_t::Trace, xxx_logpos, "trace");
+		xxx::log::tracer_t	d(logger, xxx::log::level_t::Debug, xxx_logpos, "debug");
+		xxx::log::tracer_t	v(logger, xxx::log::level_t::Verbose, xxx_logpos, "verbose");
 
 		using namespace std::string_literals;
 		f.set_result("1");
@@ -208,17 +208,17 @@ test_logger()
 
 	xxx::log::add_logger("tag", xxx::log::level_t::All, "test.log", "test", true);
 	auto&	logger2	= xxx::log::logger("tag");
-	logger2.oops(xxx_log, "oops");
-	logger2.err(xxx_log, "err");
-	logger2.warn(xxx_log, "warn");
-	logger2.notice(xxx_log, "notice");
-	logger2.info(xxx_log, "info");
-	logger2.trace(xxx_log, "trace");
-	logger2.debug(xxx_log, "debug");
-	logger2.verbose(xxx_log, "verbose");
+	logger2.oops(xxx_logpos, "oops");
+	logger2.err(xxx_logpos, "err");
+	logger2.warn(xxx_logpos, "warn");
+	logger2.notice(xxx_logpos, "notice");
+	logger2.info(xxx_logpos, "info");
+	logger2.trace(xxx_logpos, "trace");
+	logger2.debug(xxx_logpos, "debug");
+	logger2.verbose(xxx_logpos, "verbose");
 
 	{
-		xxx::log::tracer_t	l(logger2, xxx_log, "arg1", 2);
+		xxx::log::tracer_t	l(logger2, xxx_logpos, "arg1", 2);
 		l.set_result(3);
 	}
 }
