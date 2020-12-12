@@ -115,20 +115,17 @@ ignore_exceptions(P const& procedure, H const& handler) noexcept
 namespace impl {
 
 inline static void
-dump_exception_(std::ostream& os, std::exception const& e, unsigned nested) noexcept
+dump_exception_(std::ostream& os, std::exception const& e, unsigned nested)
 {
-	ignore_exceptions([&os, &e, nested]()
-	{
-		// The nested_exception type would not be simple.
-		auto const	p		= dynamic_cast<std::nested_exception const*>(&e);
-		auto const	name	= p == nullptr ? typeid(e).name() : "std::nested_exception";
+	// The nested_exception type would not be simple.
+	auto const	p		= dynamic_cast<std::nested_exception const*>(&e);
+	auto const	name	= p == nullptr ? typeid(e).name() : "std::nested_exception";
 
-		if(0u == nested)
-		{
-			os		<< e.what() << " (" << name << ")" << std::endl;
-		}
-		os		<< " [" << nested << "] " << e.what() << " (" << name << ")" << std::endl;
-	});
+	if(0u == nested)
+	{
+		os		<< e.what() << " (" << name << ")" << std::endl;
+	}
+	os		<< " [" << nested << "] " << e.what() << " (" << name << ")" << std::endl;
 
 	try
 	{
