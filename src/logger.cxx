@@ -51,14 +51,14 @@ strip(std::string const& str)
 }
 
 void
-logger_t::log_(level_t level, std::optional<pos_t> const& pos, char const* message)
+logger_t::log_(level_t level, std::optional<sl::source_location> const& pos, char const* message)
 {
 	using namespace std::string_literals;
 
 	validate_argument(level != level_t::Silent && level != level_t::All);
 	if(pos)
 	{
-		validate_argument(pos->file() != nullptr && pos->function() != nullptr);
+		validate_argument(pos->file_name() != nullptr && pos->function_name() != nullptr);
 	}
 
 	if(static_cast<int>(level_) < static_cast<int>(level))
@@ -68,7 +68,7 @@ logger_t::log_(level_t level, std::optional<pos_t> const& pos, char const* messa
 
 	char const*	Lv[]{ " [S] ", " [F] ", " [E] ", " [W] ", " [N] ", " [I] ", " [D] ", " [T] ", " [V] ", " [A] " };
 
-	auto const			filename{ pos ? strip(pos->file()) : ""s };
+	auto const			filename{ pos ? strip(pos->file_name()) : ""s };
 
 	std::ostringstream	oss;
 
@@ -81,7 +81,7 @@ logger_t::log_(level_t level, std::optional<pos_t> const& pos, char const* messa
 			<< Lv[static_cast<int>(level)];
 		if(pos)
 		{
-			oss << "{{" << filename << ':' << pos->line() << ' ' << pos->function() << "}} ";
+			oss << "{{" << filename << ':' << pos->line() << ' ' << pos->function_name() << "}} ";
 		}
 		oss << (message == nullptr ? "" : message);
 	}

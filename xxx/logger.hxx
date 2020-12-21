@@ -13,6 +13,51 @@
 #include <string>
 #include <optional>
 
+#if defined(__cpp_lib_source_location) && 201907L <= __cpp_lib_source_location && __has_include(<source_location>)
+#include <source_location>
+#define	xxx_logpos	std::source_location::current()
+namespace xxx {
+namespace sl {
+using std::source_location;
+}	// namespace sl
+}	// namespace xxx
+#elif 201907L <= __cplusplus && __has_include(<experimental/source_location>)
+#include <experimental/source_location>
+#define	xxx_logpos	std::experimental::source_location::current()
+namespace xxx {
+namespace sl {
+using std::experimental::source_location;
+}	// namespace sl
+}	// namespace xxx
+#else
+#include <cstdint>
+namespace xxx {
+namespace sl {
+
+struct source_location
+{
+public:
+	constexpr	auto		file_name() const noexcept { return file_; }
+	constexpr	auto		function_name() const noexcept { return func_; }	
+	constexpr	auto		line() const noexcept { return line_; }
+	constexpr	auto		column() const noexcept { return column_; }
+
+	constexpr	source_location(char const* file, char const* func, std::uint_least32_t line, std::uint_least32_t column=0u) noexcept : file_{ file }, func_{ func }, line_{ line }, column_ { column } {}
+private:
+	char const*				file_{};
+	char const*				func_{};	
+	std::uint_least32_t		line_{};
+	std::uint_least32_t		column_{};
+};
+
+}	// namespace sl
+}	// namespace xxx
+
+///	@brief	Logging utility macro.
+///	It can be used as parameter of the following logging methods.
+#define	xxx_logpos	::xxx::sl::source_location{__FILE__, __func__, __LINE__, 0}
+#endif
+
 #if defined(xxx_no_logging)
 #include <iosfwd>
 #else
@@ -39,25 +84,6 @@ enum class level_t
 	Verbose,	///< Verbose
 	All,		///< All (=Verbose)
 };
-
-class pos_t
-{
-public:
-	auto const* file()const { return file_; }
-	auto		line()const { return line_; }
-	auto const* function()const { return function_; }
-
-	pos_t(char const* file, long line, char const* function)
-		: file_(file), line_(line), function_(function) {}
-private:
-	char const* file_;
-	long		line_;
-	char const* function_;
-};
-
-///	@brief	Logging utility macro.
-///	It can be used as parameter of the following logging methods.
-#define xxx_logpos		::xxx::log::pos_t{__FILE__, __LINE__, __func__}
 
 #if ! defined(xxx_no_logging)
 
@@ -119,15 +145,15 @@ enclose([[maybe_unused]] Args... args)
 class logger_t
 {
 public:
-	template<typename... Args>	void	log(level_t, pos_t const& pos, Args...) {}
-	template<typename... Args>	void	oops(pos_t const& pos, Args...) {}
-	template<typename... Args>	void	err(pos_t const& pos, Args...) {}
-	template<typename... Args>	void	warn(pos_t const& pos, Args...) {}
-	template<typename... Args>	void	notice(pos_t const& pos, Args...) {}
-	template<typename... Args>	void	info(pos_t const& pos, Args...)  {}
-	template<typename... Args>	void	debug(pos_t const& pos, Args...) {}
-	template<typename... Args>	void	trace(pos_t const& pos, Args...) {}
-	template<typename... Args>	void	verbose(pos_t const& pos, Args...) {}
+	template<typename... Args>	void	log(level_t, sl::source_location const& pos, Args...) {}
+	template<typename... Args>	void	oops(sl::source_location const& pos, Args...) {}
+	template<typename... Args>	void	err(sl::source_location const& pos, Args...) {}
+	template<typename... Args>	void	warn(sl::source_location const& pos, Args...) {}
+	template<typename... Args>	void	notice(sl::source_location const& pos, Args...) {}
+	template<typename... Args>	void	info(sl::source_location const& pos, Args...)  {}
+	template<typename... Args>	void	debug(sl::source_location const& pos, Args...) {}
+	template<typename... Args>	void	trace(sl::source_location const& pos, Args...) {}
+	template<typename... Args>	void	verbose(sl::source_location const& pos, Args...) {}
 	template<typename... Args>	void	log(Args...) {}
 	template<typename... Args>	void	oops(Args...) {}
 	template<typename... Args>	void	err(Args...) {}
@@ -163,7 +189,7 @@ public:
 	///	@param[in]		args		More arguments to log
 	template<typename... Args>
 	void
-	log(level_t level, pos_t const& pos, Args... args)
+	log(level_t level, sl::source_location const& pos, Args... args)
 	{
 		std::ostringstream	oss;
 		impl::dump_(oss, args...);
@@ -171,13 +197,13 @@ public:
 	}
 	///	@overload
 	void
-	log(level_t level, pos_t const& pos, char const* message)
+	log(level_t level, sl::source_location const& pos, char const* message)
 	{
 		log_(level, pos, message);
 	}
 	///	@overload
 	void
-	log(level_t level, pos_t const& pos, std::string const& message)
+	log(level_t level, sl::source_location const& pos, std::string const& message)
 	{
 		log_(level, pos, message.c_str());
 	}
@@ -188,7 +214,7 @@ public:
 	///	@see			xxx_logpos
 	template<typename... Args>
 	void
-	oops(pos_t const& pos, Args... args)
+	oops(sl::source_location const& pos, Args... args)
 	{
 		log(level_t::Fatal, pos, args...);
 	}
@@ -199,7 +225,7 @@ public:
 	///	@see			xxx_logpos
 	template<typename... Args>
 	void
-	err(pos_t const& pos, Args... args)
+	err(sl::source_location const& pos, Args... args)
 	{
 		log(level_t::Error, pos, args...);
 	}
@@ -210,7 +236,7 @@ public:
 	///	@see			xxx_logpos
 	template<typename... Args>
 	void
-	warn(pos_t const& pos, Args... args)
+	warn(sl::source_location const& pos, Args... args)
 	{
 		log(level_t::Warn, pos, args...);
 	}
@@ -221,7 +247,7 @@ public:
 	///	@see			xxx_logpos
 	template<typename... Args>
 	void
-	notice(pos_t const& pos, Args... args)
+	notice(sl::source_location const& pos, Args... args)
 	{
 		log(level_t::Notice, pos, args...);
 	}
@@ -232,7 +258,7 @@ public:
 	///	@see			xxx_logpos
 	template<typename... Args>
 	void
-	info(pos_t const& pos, Args... args)
+	info(sl::source_location const& pos, Args... args)
 	{
 		log(level_t::Info, pos, args...);
 	}
@@ -243,7 +269,7 @@ public:
 	///	@see			xxx_logpos
 	template<typename... Args>
 	void
-	debug(pos_t const& pos, Args... args)
+	debug(sl::source_location const& pos, Args... args)
 	{
 		log(level_t::Debug, pos, args...);
 	}
@@ -254,7 +280,7 @@ public:
 	///	@see			xxx_logpos
 	template<typename... Args>
 	void
-	trace(pos_t const& pos, Args... args)
+	trace(sl::source_location const& pos, Args... args)
 	{
 		log(level_t::Trace, pos, args...);
 	}
@@ -265,7 +291,7 @@ public:
 	///	@see			xxx_logpos
 	template<typename... Args>
 	void
-	verbose(pos_t const& pos, Args... args)
+	verbose(sl::source_location const& pos, Args... args)
 	{
 		log(level_t::Verbose, pos, args...);
 	}
@@ -414,7 +440,7 @@ public:
 		level_{ level_t::Info }, path_{}, logger_{}, console_{ true }, mutex_{}
 	{}
 private:
-	void	log_(level_t level, std::optional<pos_t> const& pos, char const* message);
+	void	log_(level_t level, std::optional<sl::source_location> const& pos, char const* message);
 private:
 	level_t					level_;		///< Logger level.
 	std::filesystem::path	path_;		///< The path of log file.
@@ -455,8 +481,8 @@ logger_t&	logger(std::string const& tag);
 class tracer_t
 {
 public:
-	template<typename... Args>	tracer_t(logger_t&, pos_t const& pos, Args...) {}
-	template<typename... Args>	tracer_t(logger_t&, level_t, pos_t const& pos, Args...) {}
+	template<typename... Args>	tracer_t(logger_t&, sl::source_location const& pos, Args...) {}
+	template<typename... Args>	tracer_t(logger_t&, level_t, sl::source_location const& pos, Args...) {}
 
 	template<typename T>	void	set_result(T) {}
 };
@@ -473,7 +499,7 @@ public:
 	///	@param[in]		args		More agruments.
 	///	@see			xxx_logpos
 	template<typename... Args>
-	tracer_t(logger_t& logger, pos_t const& pos, Args... args) :
+	tracer_t(logger_t& logger, sl::source_location const& pos, Args... args) :
 		tracer_t(logger, level_t::Trace, pos, args...)
 	{}
 	///	@brief	Dumps log at entering into the scope.
@@ -483,20 +509,20 @@ public:
 	///	@param[in]		args		More agruments.
 	///	@see			xxx_logpos
 	template<typename... Args>
-	tracer_t(logger_t& logger, level_t level, pos_t const& pos, Args... args) :
+	tracer_t(logger_t& logger, level_t level, sl::source_location const& pos, Args... args) :
 		logger_{ logger },
 		pos_{ pos },
 		result_{},
 		level_{ level }
 	{
-		logger_.log(level, pos, ">>>[[ ", pos.function(), enclose(args...), " ]]");
+		logger_.log(level, pos, ">>>[[ ", pos.function_name(), enclose(args...), " ]]");
 	}
 	///	@brief	Dumps log at leaving from the scope.
 	~tracer_t()
 	{
 		if(pos_)
 		{
-			logger_.log(level_, *pos_, "<<<[[ ", pos_->function(), enclose(result_), " ]]");
+			logger_.log(level_, *pos_, "<<<[[ ", pos_->function_name(), enclose(result_), " ]]");
 		}
 		else
 		{
@@ -508,10 +534,10 @@ public:
 	///	@param[in]		result		Result of the method.
 	template<typename T>	void	set_result(T result){	std::ostringstream	oss;	oss	<< result;	result_	= oss.str();	}
 private:
-	logger_t&				logger_;	///< Logger.
-	std::optional<pos_t>	pos_;		///< Position of source.
-	std::string				result_;	///< Result.
-	level_t					level_;		///< Trace level.
+	logger_t&							logger_;	///< Logger.
+	std::optional<sl::source_location>	pos_;		///< Position of source.
+	std::string							result_;	///< Result.
+	level_t								level_;		///< Trace level.
 private:
 	tracer_t(tracer_t const&)						= delete;
 	tracer_t const&		operator =(tracer_t const&)	= delete;
