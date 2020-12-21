@@ -379,16 +379,16 @@ public:
 	///		- [xxx_win32]	dump to debugger (in debug mode)
 	///		- [xxx_posix]	dump to syslog
 	///	@param[in]		logger		Logger name
-	void	set_logger(std::string const& logger)		{ std::lock_guard{ mutex_ };	logger_ = logger; }
+	void	set_logger(std::string const& logger)		{ std::lock_guard	l{ mutex_ };	logger_ = logger; }
 	///	@brief	Sets log file.
 	///	@param[in]		path		The path of log name.
-	void	set_path(std::filesystem::path const& path)	{ std::lock_guard{ mutex_ };	path_		= path;		}
+	void	set_path(std::filesystem::path const& path)	{ std::lock_guard	l{ mutex_ };	path_		= path;		}
 	///	@brief	Sets whether dump it to standard error or not.
 	///	@param[in]		on		Whether dump it to standart error or not..
-	void	set_console(bool on)						{ std::lock_guard{ mutex_ };	console_	= on;		}
+	void	set_console(bool on)						{ std::lock_guard	l{ mutex_ };	console_	= on;		}
 	///	@brief	Sets loggihng level.
 	///	@param[in]		level		Logger level.
-	void	set_level(level_t level)					{ std::lock_guard{ mutex_ };	level_	= level;	}
+	void	set_level(level_t level)					{ std::lock_guard	l{ mutex_ };	level_	= level;	}
 
 	///	@brief	Gets the external logger name.
 	///	@return		External logger name.
