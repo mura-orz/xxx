@@ -13,22 +13,22 @@
 #include <string>
 #include <optional>
 
-#if defined(__cpp_lib_source_location) && 201907L <= __cpp_lib_source_location && __has_include(<source_location>)
+#if defined(__cpp_lib_source_location) && __has_include(<source_location>)
 #include <source_location>
-#define	xxx_logpos	std::source_location::current()
 namespace xxx {
 namespace sl {
 using std::source_location;
 }	// namespace sl
 }	// namespace xxx
-#elif 201907L <= __cplusplus && __has_include(<experimental/source_location>)
+#define	xxx_logpos	std::source_location::current()
+#elif 201703L <= __cplusplus && __has_include(<experimental/source_location>)
 #include <experimental/source_location>
-#define	xxx_logpos	std::experimental::source_location::current()
 namespace xxx {
 namespace sl {
 using std::experimental::source_location;
 }	// namespace sl
 }	// namespace xxx
+#define	xxx_logpos	std::experimental::source_location::current()
 #else
 #include <cstdint>
 namespace xxx {
@@ -44,10 +44,10 @@ public:
 
 	constexpr	source_location(char const* file, char const* func, std::uint_least32_t line, std::uint_least32_t column=0u) noexcept : file_{ file }, func_{ func }, line_{ line }, column_ { column } {}
 private:
-	char const*				file_{};
-	char const*				func_{};	
-	std::uint_least32_t		line_{};
-	std::uint_least32_t		column_{};
+	char const*				file_;
+	char const*				func_;
+	std::uint_least32_t		line_;
+	std::uint_least32_t		column_;
 };
 
 }	// namespace sl
@@ -544,7 +544,7 @@ private:
 };
 
 ///	@overload
-template<>	inline void		tracer_t::set_result(char const* result) { result_ = result; }
+template<>	inline void		tracer_t::set_result(std::string_view const& result) { result_ = std::string{result}; }
 ///	@overload
 template<>	inline void		tracer_t::set_result(std::string const& result) { result_ = result; }
 
