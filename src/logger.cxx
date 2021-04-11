@@ -18,7 +18,9 @@
 #include <chrono>
 #include <ctime>
 
-#if defined(xxx_win32)
+#if defined(xxx_standard_cpp_only)
+
+#elif defined(xxx_win32)
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
@@ -81,7 +83,7 @@ logger_t::log_(level_t level, std::optional<sl::source_location> const& pos, cha
 			<< Lv[static_cast<int>(level)];
 		if(pos)
 		{
-			oss << "{{" << filename << ':' << pos->line() << ' ' << pos->function_name() << "}} ";
+			oss << "{" << filename << ':' << std::setw(5) << std::setfill('_') <<  pos->line() << "} " << pos->function_name() << " ";
 		}
 		oss << (message == nullptr ? "" : message);
 	}
@@ -125,7 +127,9 @@ logger_t::log_(level_t level, std::optional<sl::source_location> const& pos, cha
 	{
 		ignore_exceptions([&str, level, this]()
 		{
-#if defined(xxx_win32)
+#if defined(xxx_standard_cpp_only)
+
+#elif defined(xxx_win32)
 			::OutputDebugStringA(("[" + logger_ + "] " + str + "\r\n").c_str());
 #elif defined(xxx_posix)
 			int		lv;
