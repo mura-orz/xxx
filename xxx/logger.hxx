@@ -9,27 +9,31 @@
 #define xxx_LOGGER_HXX_
 
 #include <filesystem>
+#include <vector>
 #include <stdexcept>
 #include <string>
 #include <optional>
 
-#if defined(__cpp_lib_source_location) && __has_include(<source_location>)
+#if defined(__cpp_lib_source_location) && 201907L <= __cpp_lib_source_location && __has_include(<source_location>)
+// uses standard source location
 #include <source_location>
+#define	xxx_logpos	std::source_location::current()
 namespace xxx {
 namespace sl {
 using std::source_location;
 }	// namespace sl
 }	// namespace xxx
-#define	xxx_logpos	std::source_location::current()
-#elif 201703L <= __cplusplus && __has_include(<experimental/source_location>)
+#elif 201907L <= __cplusplus && __has_include(<experimental/source_location>)
+// uses experinental implementation of source location
 #include <experimental/source_location>
+#define	xxx_logpos	std::experimental::source_location::current()
 namespace xxx {
 namespace sl {
 using std::experimental::source_location;
 }	// namespace sl
 }	// namespace xxx
-#define	xxx_logpos	std::experimental::source_location::current()
 #else
+// uses own implementation of source location
 #include <cstdint>
 namespace xxx {
 namespace sl {
@@ -44,10 +48,10 @@ public:
 
 	constexpr	source_location(char const* file, char const* func, std::uint_least32_t line, std::uint_least32_t column=0u) noexcept : file_{ file }, func_{ func }, line_{ line }, column_ { column } {}
 private:
-	char const*				file_;
-	char const*				func_;
-	std::uint_least32_t		line_;
-	std::uint_least32_t		column_;
+	char const*				file_{};
+	char const*				func_{};
+	std::uint_least32_t		line_{};
+	std::uint_least32_t		column_{};
 };
 
 }	// namespace sl
@@ -73,16 +77,16 @@ namespace log {
 ///	@brief	logging level.
 enum class level_t
 {
-	Silent,		///< Silent (No logging)
-	Fatal,		///< Fatal error
-	Error,		///< Normal error
-	Warn,		///< Warning
-	Notice,		///< Notice
-	Info,		///< Information
-	Debug,		///< Debug
-	Trace,		///< Trace
-	Verbose,	///< Verbose
-	All,		///< All (=Verbose)
+	Silent,		///< Silent (No logging).
+	Fatal,		///< Fatal error.
+	Error,		///< Normal error.
+	Warn,		///< Warning.
+	Notice,		///< Notice.
+	Info,		///< Information.
+	Debug,		///< Debug.
+	Trace,		///< Trace.
+	Verbose,	///< Verbose.
+	All,		///< All (=Verbose).
 };
 
 #if ! defined(xxx_no_logging)
@@ -90,6 +94,9 @@ enum class level_t
 namespace impl {
 
 //	Dumps arguments.
+//	@param[in,out]	os		Output stream.
+//	@param[in]		head	Head of argruments.
+//	@param[in]		args	Other argument(s).
 template<typename T, typename... Args>
 inline void
 dump_(std::ostream& os, T const& head, Args... args)
@@ -100,13 +107,37 @@ dump_(std::ostream& os, T const& head, Args... args)
 		dump_(os, args...);
 	}
 }
+//	Dumps vector arguments.
+//	@param[in,out]	os		Output stream.
+//	@param[in]		head	Head of argruments.
+//	@param[in]		args	Other argument(s).
+template <typename T, typename... Args>
+inline void
+dump_(std::ostream& os, std::vector<T> const& head, Args... args)
+{
+	os << "[";
+	for (bool first {true}; auto const& arg : head)
+	{
+		if (!first) os << ",";
+		first = false;
+		dump_(os, arg);
+	}
+	os << "]";
+	if constexpr (0 < sizeof...(Args))
+	{
+		dump_(os, args...);
+	}
+}
 
 //	Dumps arguments with separation comma.
-template<typename T, typename... Args>
+//	@param[in,out]	os		Output stream.
+//	@param[in]		head	Head of argruments.
+//	@param[in]		args	Other argument(s).
+template <typename T, typename... Args>
 inline void
 enclose_(std::ostream& os, T const& head, Args... args)
 {
-	os	<< head;
+	dump_(os, head);
 	if constexpr (0 < sizeof...(args))
 	{
 		os	<< ',';
@@ -126,7 +157,7 @@ template<typename... Args>
 inline std::string
 enclose([[maybe_unused]] Args... args)
 {
-#if defined(xxx_no_logging)
+#if !defined(xxx_no_logging)
 	std::ostringstream	oss;
 	oss << '(';
 	if constexpr (0 < sizeof...(args))
@@ -515,36 +546,38 @@ public:
 		result_{},
 		level_{ level }
 	{
-		logger_.log(level, pos, ">>>[[ ", pos.function_name(), enclose(args...), " ]]");
-	}
+		logger_.log(level, pos, ">>>", enclose(args...));
+	}	
 	///	@brief	Dumps log at leaving from the scope.
 	~tracer_t()
 	{
-		if(pos_)
-		{
-			logger_.log(level_, *pos_, "<<<[[ ", pos_->function_name(), enclose(result_), " ]]");
-		}
-		else
-		{
-			logger_.log(level_, "<<<[[ ", enclose(result_), " ]]");
-		}
+		logger_.log(level_, pos_, "<<<", enclose(result_));
 	}
-
+	///	@brief	Dumps log as trace level.
+	///	@tparam			Args		arguments
+	///	@param[in]		args		More arguments to log
+	///	@see			xxx_logpos
+	template <typename... Args>
+	void
+	trace(Args... args)
+	{
+		logger_.log(level_, pos_, "--- ", args...);
+	}
 	///	@brief	Sets result of the method.
 	///	@param[in]		result		Result of the method.
 	template<typename T>	void	set_result(T result){	std::ostringstream	oss;	oss	<< result;	result_	= oss.str();	}
 private:
-	logger_t&							logger_;	///< Logger.
-	std::optional<sl::source_location>	pos_;		///< Position of source.
-	std::string							result_;	///< Result.
-	level_t								level_;		///< Trace level.
+	logger_t&				logger_;	///< Logger.
+	sl::source_location		pos_;		///< Position of source.
+	std::string				result_;	///< Result.
+	level_t					level_;		///< Trace level.
 private:
 	tracer_t(tracer_t const&)						= delete;
 	tracer_t const&		operator =(tracer_t const&)	= delete;
 };
 
 ///	@overload
-template<>	inline void		tracer_t::set_result(std::string_view const& result) { result_ = std::string{result}; }
+template<>	inline void		tracer_t::set_result(char const* result) { result_ = result; }
 ///	@overload
 template<>	inline void		tracer_t::set_result(std::string const& result) { result_ = result; }
 
