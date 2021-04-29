@@ -68,18 +68,28 @@ logger_t::log_(level_t level, std::optional<sl::source_location> const& pos, cha
 		return;
 	}
 
-	char const*	Lv[]{ " [S] ", " [F] ", " [E] ", " [W] ", " [N] ", " [I] ", " [D] ", " [T] ", " [V] ", " [A] " };
+	char const*	Lv[]{ "[S]", "[F]", "[E]", "[W]", "[N]", "[I]", "[D]", "[T]", "[V]", "[A]" };
 
 	auto const			filename{ pos ? strip(pos->file_name()) : ""s };
 
 	std::ostringstream	oss;
 
-	std::lock_guard		lock{ mutex_ };
-
 	{
-		auto const		now{ std::chrono::system_clock::now() };
-		auto const		t{ std::chrono::system_clock::to_time_t(now) };
-		oss << std::put_time(std::localtime(&t), "%FT%T%z")
+		using namespace std::chrono_literals;
+
+		auto const					now{ std::chrono::system_clock::now() };
+		std::tm						lt;
+		std::chrono::microseconds	ms;
+		{
+			std::lock_guard	lock{mutex_};
+			auto const		tt{std::chrono::system_clock::to_time_t(now)};
+			lt	= *std::localtime(&tt);
+			ms	= std::chrono::duration_cast<std::chrono::microseconds>(now.time_since_epoch()) % 1s;
+		}
+
+		oss << std::put_time(&lt, "%FT%T.")
+			<< std::setfill('0') << std::setw(6) << ms.count()
+			<< std::put_time(&lt, "%z")
 			<< Lv[static_cast<int>(level)];
 		if(pos)
 		{
@@ -91,7 +101,7 @@ logger_t::log_(level_t level, std::optional<sl::source_location> const& pos, cha
 
 	if(console_)
 	{
-		ignore_exceptions([&str, level]()
+		ignore_exceptions([this, &str, level]()
 		{
 			std::string		begin;
 			switch(level)
@@ -109,14 +119,18 @@ logger_t::log_(level_t level, std::optional<sl::source_location> const& pos, cha
 
 			auto const	end{ "\x1b[0m"s };
 
-			std::clog	<< begin << str << end << std::endl;
+			std::lock_guard lock{console_mutex_};
+
+			std::clog << begin << str << end << std::endl;
 		});
 	}
 	if( ! path_.empty())
 	{
 		ignore_exceptions([&str, this]()
 		{
-			std::ofstream	ofs{ path_, std::ios::app };
+			std::lock_guard lock{file_mutex_};
+
+			std::ofstream	ofs{path_, std::ios::app};
 			if(ofs.is_open())
 			{
 				ofs << str << std::endl;
@@ -130,6 +144,8 @@ logger_t::log_(level_t level, std::optional<sl::source_location> const& pos, cha
 #if defined(xxx_standard_cpp_only)
 
 #elif defined(xxx_win32)
+			std::lock_guard lock{mutex_};
+
 			::OutputDebugStringA(("[" + logger_ + "] " + str + "\r\n").c_str());
 #elif defined(xxx_posix)
 			int		lv;
@@ -145,6 +161,9 @@ logger_t::log_(level_t level, std::optional<sl::source_location> const& pos, cha
 			case level_t::Verbose:	lv = LOG_DEBUG;		break;
 			default:				lv = LOG_CRIT;		break;
 			}
+
+			std::lock_guard lock{mutex_};
+
 			::openlog(logger_.c_str(), LOG_PID, LOG_USER);
 			::syslog(lv, "%s", str.c_str());
 #else

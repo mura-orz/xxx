@@ -71,6 +71,13 @@ private:
 
 namespace xxx {
 
+inline std::ostream&
+operator<<(std::ostream& os, char8_t ch)
+{
+	os << static_cast<char>(ch);
+	return os;
+}
+
 ///	@brief	logger.
 namespace log {
 
@@ -463,12 +470,10 @@ public:
 	///	@param[in]		path		The path of log file.
 	///	@param[in]		logger		External logger name.
 	///	@param[in]		console		Whether dump it to standard error or not.
-	logger_t(level_t level, std::filesystem::path const& path, std::string const&logger, bool console) :
-		level_{ level }, path_{ path }, logger_{ logger }, console_{ console }, mutex_{}
+	logger_t(level_t level, std::filesystem::path const& path, std::string const&logger, bool console) : level_{level}, path_{path}, logger_{logger}, console_{console}, mutex_{}, file_mutex_{}, console_mutex_{}
 	{}
 	///	@brief	Constructor.
-	logger_t() :
-		level_{ level_t::Info }, path_{}, logger_{}, console_{ true }, mutex_{}
+	logger_t() : level_{level_t::Info}, path_{}, logger_{}, console_{true}, mutex_{}, file_mutex_{}, console_mutex_{}
 	{}
 private:
 	void	log_(level_t level, std::optional<sl::source_location> const& pos, char const* message);
@@ -478,6 +483,8 @@ private:
 	std::string				logger_;	///< External logger name.
 	bool					console_;	///< Whether dump it to standard error or not.
 	std::mutex				mutex_;		///< Mutex.
+	std::mutex				file_mutex_;	///< Mutex.
+	std::mutex				console_mutex_;	///< Mutex.
 };
 
 #endif	// xxx_no_logging
