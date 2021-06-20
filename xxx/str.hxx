@@ -9,7 +9,6 @@
 
 #include <string>
 #include <string_view>
-#include <sstream>
 #include <algorithm>
 #include <cctype>
 #include <stdexcept>
@@ -17,60 +16,62 @@
 namespace xxx {
 
 ///	@brief	Trims whitespaces of right side.
+/// @notice	It depends on global locale.
 ///	@param[in]		str		String to trim
 ///	@return		Trimed string
 inline std::string
 trim_right(std::string_view str)
 {
-	auto const	right_ws_itr{ std::find_if_not(std::crbegin(str), std::crend(str),
-		[](auto ch) { return std::isspace(ch); }).base() };
+	using std::cbegin, std::crbegin, std::crend;
 
-	std::ostringstream	oss;
-	std::copy(std::cbegin(str), right_ws_itr, std::ostreambuf_iterator<char>(oss));
-	return oss.str();
+	if (auto const	right_ws_itr{ std::find_if_not(crbegin(str), crend(str),
+		[](auto ch) { return std::isspace(ch); }).base() };
+		right_ws_itr != cend(str))
+	{
+		return std::string(cbegin(str), right_ws_itr);
+	}
+	return std::string();
 }
 
 ///	@brief	Trims whitespaces of left side.
+/// @notice	It depends on global locale.
 ///	@param[in]		str		String to trim
 ///	@return		Trimed string
 inline std::string
 trim_left(std::string_view str)
 {
-	auto const	left_ws_itr{ std::find_if_not(std::cbegin(str), std::cend(str),
-		[](auto ch) { return std::isspace(ch); }) };
+	using std::cbegin, std::cend;
 
-	if (left_ws_itr == std::cend(str))
+	if (auto const	left_ws_itr{ std::find_if_not(cbegin(str), cend(str),
+		[](auto ch) { return std::isspace(ch); }) };
+		left_ws_itr != cend(str))
 	{
-		return std::string();
+		return std::string(left_ws_itr, cend(str));
 	}
-	else
-	{
-		std::ostringstream	oss;
-		std::copy(left_ws_itr, std::cend(str), std::ostreambuf_iterator<char>(oss));
-		return oss.str();
-	}
+	return std::string();
 }
 
 ///	@brief	Trims whitespaces.
+/// @notice	It depends on global locale.
 ///	@param[in]		str		String to trim
 ///	@return		Trimed string
 inline std::string
 trim(std::string_view str)
 {
-	auto const	left_ws_itr{ std::find_if_not(std::cbegin(str), std::cend(str),
+	using std::cbegin, std::cend, std::crbegin, std::crend;
+
+	auto const	left_ws_itr{ std::find_if_not(cbegin(str), cend(str),
 		[](auto ch) { return std::isspace(ch); }) };
 
-	if (left_ws_itr == std::cend(str))
+	if (left_ws_itr == cend(str))
 	{
 		return std::string();
 	}
 
-	auto const	right_ws_itr{ std::find_if_not(std::crbegin(str), std::crend(str),
+	auto const	right_ws_itr{ std::find_if_not(crbegin(str), crend(str),
 		[](auto ch) { return std::isspace(ch); }).base() };
 
-	std::ostringstream	oss;
-	std::copy(left_ws_itr, right_ws_itr, std::ostreambuf_iterator<char>(oss));
-	return oss.str();
+	return std::string(left_ws_itr, right_ws_itr);
 }
 
 ///	@brief	Casts from string to the type @p T.
@@ -79,9 +80,9 @@ trim(std::string_view str)
 ///	@return		Casted value
 template<typename T>
 inline T
-lexical_cast(std::string_view str)
+lexical_cast(std::string const& str)
 {
-	std::istringstream	iss{ str.data() };
+	std::istringstream	iss{ str };
 	T	t{};
 	if ( ! (iss >> t))
 	{
@@ -93,29 +94,21 @@ lexical_cast(std::string_view str)
 ///	@overload
 template<>
 inline bool
-lexical_cast(std::string_view str)
+lexical_cast(std::string const& str)
 {
-	std::istringstream	iss{ str.data() };
+	std::istringstream	iss{ str };
 	bool	t{};
 	if ( ! (iss >> std::boolalpha >> t))
 	{
 		throw std::invalid_argument(__func__);
-	}
+	}	
 	return t;
 }
 
 ///	@overload
 template<>
 inline std::string
-lexical_cast(std::string_view str)
-{
-	return str.data();
-}
-
-///	@overload
-template<>
-inline std::string_view
-lexical_cast(std::string_view str)
+lexical_cast(std::string const& str)
 {
 	return str;
 }
