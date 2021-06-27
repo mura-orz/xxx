@@ -75,12 +75,23 @@ private:
 
 namespace xxx {
 
+#if defined(__cpp_char8_t) && 201803 <= __cpp_char8_t
+
 inline std::ostream&
 operator<<(std::ostream& os, char8_t ch)
 {
-	os << static_cast<char>(ch);
+	if (ch < 0x80)
+	{
+		os << static_cast<char>(ch);
+	}
+	else
+	{
+		os << std::hex << std::setfill('0') << std::setw(2) << std::uppercase << static_cast<unsigned>(ch);
+	}
 	return os;
 }
+
+#endif	// __cpp_char8_t
 
 ///	@brief	logger.
 namespace log {
@@ -615,7 +626,8 @@ public:
 	template<typename... Args>	tracer_t(logger_t&, sl::source_location const& pos, Args...) {}
 	template<typename... Args>	tracer_t(logger_t&, level_t, sl::source_location const& pos, Args...) {}
 
-	template<typename T>	void	set_result(T) {}
+	template <typename... Args>	void	trace(Args... args){}
+	template<typename T>		void	set_result(T) {}
 };
 
 #else	// xxx_no_logging
