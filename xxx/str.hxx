@@ -101,7 +101,7 @@ lexical_cast(std::string const& str)
 	if ( ! (iss >> std::boolalpha >> t))
 	{
 		throw std::invalid_argument(__func__);
-	}	
+	}
 	return t;
 }
 

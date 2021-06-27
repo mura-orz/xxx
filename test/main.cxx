@@ -8,6 +8,7 @@
 #include <xxx/exceptions.hxx>
 #include <xxx/finally.hxx>
 #include <xxx/logger.hxx>
+#include <xxx/str.hxx>
 
 #include <stdexcept>
 #include <iostream>
@@ -223,6 +224,46 @@ test_logger()
 	}
 }
 
+void
+test_string()
+{
+	std::cout << "---[" << __func__ << "]---" << std::endl;
+
+	{
+		char const a[]{ "  \t  \r   \n    \r\n  \v   aaa    \t  \r   \n    \r\n  \v " };
+
+		std::string rihgt_result{ "  \t  \r   \n    \r\n  \v   aaa" };
+		std::string left_result{ "aaa    \t  \r   \n    \r\n  \v " };
+		std::string result{ "aaa" };
+
+		std::cout << (xxx::trim_left(a) == left_result) << std::endl;
+		std::cout << (xxx::trim_right(a) == rihgt_result) << std::endl;
+		std::cout << (xxx::trim(a) == result) << std::endl;
+	}
+
+	{
+		try {
+			xxx::lexical_cast<bool>("1");
+		} catch (std::invalid_argument const&)
+		{
+			std::cout << "expected exception occurred" << std::endl;
+		}
+		try {
+			xxx::lexical_cast<bool>("0");
+		}
+		catch (std::invalid_argument const&)
+		{
+			std::cout << "expected exception occurred" << std::endl;
+		}
+
+		std::cout << xxx::lexical_cast<bool>("true") << std::endl;
+		std::cout << xxx::lexical_cast<bool>("false") << std::endl;
+
+		std::cout << xxx::lexical_cast<int>("255") << std::endl;
+		std::cout << xxx::lexical_cast<double>("1.234e2") << std::endl;
+	}
+}
+
 int
 main()
 {
@@ -231,4 +272,5 @@ main()
 	test_exception_handling();
 	test_finally();
 	test_logger();
+	test_string();
 }
